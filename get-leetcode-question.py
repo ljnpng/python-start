@@ -2,6 +2,7 @@
 import os
 import requests, json
 import re
+import sys
 
 # 获取题目的方法来自下面的博客，并且添加了一些修改来更好地符合个人需要。
 # https://wanakiki.github.io/2020/leetcode-spider/
@@ -229,6 +230,9 @@ if __name__ == '__main__':
     # 只用修改这个 url 即可
     # 比如题目链接为 https://leetcode.cn/problems/evaluate-division/ 就直接全部复制即可
     # 当 url 为空的时候爬取每日一题
-    url = "https://leetcode.cn/problems/merge-two-sorted-lists/"
-
-    gen_files(url=url)
+    # url = "https://leetcode.cn/problems/merge-two-sorted-lists/"
+    if(len(sys.argv) <= 1):
+        print("Please input leetcode url, e.g. https://leetcode.cn/problems/merge-two-sorted-lists/")
+        exit()
+    url = str(sys.argv[1])
+    gen_files(url)
