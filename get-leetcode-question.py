@@ -138,8 +138,7 @@ def get_all(slug: str) -> dict:
     return question
 
 
-def get_problem_content(slug: str) -> str:
-    question = get_all(slug)
+def get_problem_content(question:dict) -> str:
     res = convert(question['translatedContent'])
     # 在正文后面填上标签
     res += "\n \n**标签**\n"
@@ -151,7 +150,8 @@ def get_problem_content(slug: str) -> str:
             tagName = tag['name']
         res += "`" + tagName + "` "
 
-    return res + "\n"
+    res += "\n"
+    return re.sub(r'\n\n\n\n*', "\n", res)  # 替换掉多个换行符
 
 
 def get_solution_by_lang(slug: str, lang: str) -> str:
@@ -181,7 +181,7 @@ def gen_markdown(path, content, title, url):
 {Content}
 
 ## 
-```go
+```java
 
 ```
 >
@@ -253,38 +253,38 @@ def gen_files(url: str):
         print(
             "Wrong URL ! Please Check\n.It should be like https://leetcode.cn/problems/evaluate-division/"
         )
-        exit()
+        return
     else:
         slug = get_today_name()
     url = "https://leetcode.cn/problems/" + slug
     question = get_all(slug=slug)
     title = question['questionFrontendId'] + '.' + question['translatedTitle']
 
-    content = get_problem_content(slug)
+    content = get_problem_content(question)
 
-    func = get_solution_by_lang(slug, 'Go')
-    content = re.sub(r'\n\n\n\n*', "\n", content)  # 替换掉多个换行符
+    # func = get_solution_by_lang(slug, 'Go')
+    # content = re.sub(r'\n\n\n\n*', "\n", content)  # 替换掉多个换行符
 
     base_dir = os.getcwd()
-    newfolder = os.path.join(base_dir,
-                             title.replace(". ", ".").replace(" ", "-"))
-    if not os.path.exists(newfolder):
-        os.makedirs(newfolder)
-        print("create new folder ", newfolder)
-    else:
-        print("already exist folder:", newfolder)
-
+#    newfolder = os.path.join(base_dir,
+#                             title.replace(". ", ".").replace(" ", "-"))
+#    if not os.path.exists(newfolder):
+#        os.makedirs(newfolder)
+#        print("create new folder ", newfolder)
+#    else:
+#        print("already exist folder:", newfolder)
+#
     # 生成 markdown 文件
-    filepath = os.path.join(base_dir, newfolder, "README.md")
+    filepath = os.path.join(base_dir, question['titleSlug'] + ".md")
     gen_markdown(filepath, content, title, url)
 
     # 生成 solution_test.go 文件
-    filepath = os.path.join(base_dir, newfolder, "solution_test.go")
-    gen_gofile(filepath, title, url, func)
+    # filepath = os.path.join(base_dir, newfolder, "solution_test.go")
+    # gen_gofile(filepath, title, url, func)
 
     # 生成 go.mod 文件
-    filepath = os.path.join(base_dir, newfolder, "go.mod")
-    gen_go_mod(filepath)
+    # filepath = os.path.join(base_dir, newfolder, "go.mod")
+    # gen_go_mod(filepath)
     return
 
 
