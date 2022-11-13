@@ -154,7 +154,7 @@ def get_problem_content(question:dict) -> str:
     return re.sub(r'\n\n\n\n*', "\n", res)  # 替换掉多个换行符
 
 
-def get_solution_by_lang(slug: str, lang: str) -> str:
+def get_solution_by_lang(question: dict, lang: str) -> str:
     """
         获取给定题目的对应语言的函数
 
@@ -163,7 +163,6 @@ def get_solution_by_lang(slug: str, lang: str) -> str:
         C++ Java Python Python3 C C# JavaScript Ruby Swift Go Scala Kotlin
         Rust PHP TypeScript Racket
     """
-    question = get_all(slug)
     # 获取对应语言的函数
     codeSnippets = question['codeSnippets']
     for x in codeSnippets:
@@ -171,7 +170,7 @@ def get_solution_by_lang(slug: str, lang: str) -> str:
             return x['code']
 
 
-def gen_markdown(path, content, title, url):
+def gen_markdown(path, content, code, title, url):
     """ 生成 markdown 文件
     """
     file = open(path, 'a', encoding="utf-8")
@@ -182,61 +181,15 @@ def gen_markdown(path, content, title, url):
 
 ## 
 ```java
+{Code}
 
 ```
 >
-""".format(titlename=title, Url=url, Content=content)
+""".format(titlename=title, Url=url, Content=content, Code=code)
     file.write(markdowncontenct)
     print(path)
     file.close()
 
-
-def gen_gofile(path: str, title: str, url: str, func: str) -> None:
-    """ 生成 solution_test.go 文件
-    
-    """
-    file = open(path, 'a', encoding="utf-8")
-    go_content = """package leetcode
-
-import (
-	"reflect"
-	"testing"
-)
-
-// {0}
-// {1}
-{2}
-func TestSolution(t *testing.T) {{
-	testCases := []struct {{
-		desc string
-		want 
-	}}{{
-		{{
-            want: ,
-		}},
-	}}
-	for _, tC := range testCases {{
-		t.Run(tC.desc, func(t *testing.T) {{
-			get := 
-			if !reflect.DeepEqual(tC.want,get){{
-				t.Errorf("input: %+v get: %v\\n",tC,get)
-			}}
-		}})
-	}}
-}}
-""".format(title.replace(" ", ""), url, func)
-    file.write(go_content)
-    print(path)
-    file.close()
-
-
-def gen_go_mod(path: str) -> None:
-    """
-        生成 go.mod 文件
-    """
-    file = open(path, 'a', encoding="utf-8")
-    file.write("module leetcode\ngo 1.15")
-    file.close()
 
 
 def gen_files(url: str):
@@ -261,30 +214,14 @@ def gen_files(url: str):
     title = question['questionFrontendId'] + '.' + question['translatedTitle']
 
     content = get_problem_content(question)
-
-    # func = get_solution_by_lang(slug, 'Go')
-    # content = re.sub(r'\n\n\n\n*', "\n", content)  # 替换掉多个换行符
+    code = get_solution_by_lang(question, 'Java')
 
     base_dir = os.getcwd()
-#    newfolder = os.path.join(base_dir,
-#                             title.replace(". ", ".").replace(" ", "-"))
-#    if not os.path.exists(newfolder):
-#        os.makedirs(newfolder)
-#        print("create new folder ", newfolder)
-#    else:
-#        print("already exist folder:", newfolder)
-#
+
     # 生成 markdown 文件
     filepath = os.path.join(base_dir, question['titleSlug'] + ".md")
-    gen_markdown(filepath, content, title, url)
+    gen_markdown(filepath, content, code, title, url)
 
-    # 生成 solution_test.go 文件
-    # filepath = os.path.join(base_dir, newfolder, "solution_test.go")
-    # gen_gofile(filepath, title, url, func)
-
-    # 生成 go.mod 文件
-    # filepath = os.path.join(base_dir, newfolder, "go.mod")
-    # gen_go_mod(filepath)
     return
 
 
